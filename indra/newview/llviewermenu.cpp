@@ -2418,6 +2418,57 @@ class LLObjectCopyUUID : public view_listener_t
 	}
 };
 
+class LLObjectDerender : public view_listener_t
+{
+    bool handleEvent(LLPointer<LLEvent> event, const LLSD& userdata)
+    {
+		LLViewerObject* slct = LLSelectMgr::getInstance()->getSelection()->getFirstObject();
+		if(!slct)return true;
+		LLUUID id = slct->getID();
+		LLObjectSelectionHandle selection = LLSelectMgr::getInstance()->getSelection();
+		LLUUID root_key;
+		LLSelectNode* node = selection->getFirstRootNode();
+		if(node)root_key = node->getObject()->getID();
+		if(root_key.notNull())
+		{
+			id = root_key;
+			//LLSelectMgr::getInstance()->removeObjectFromSelections(root_key);
+		}
+		LLSelectMgr::getInstance()->removeObjectFromSelections(id);
+
+		// ...don't kill the avatar
+		if (!(id == gAgentID))
+		{
+			LLViewerObject *objectp = gObjectList.findObject(id);
+			if (objectp)
+			{
+				// Display green bubble on kill
+				/*if ( gShowObjectUpdates )
+				{
+					LLViewerObject* newobject;
+					newobject = gObjectList.createObjectViewer(LL_PCODE_LEGACY_TEXT_BUBBLE, objectp->getRegion());
+
+					LLVOTextBubble* bubble = (LLVOTextBubble*) newobject;
+
+					bubble->mColor.setVec(0.f, 1.f, 0.f, 1.f);
+					bubble->setScale( 2.0f * bubble->getScale() );
+					bubble->setPositionGlobal(objectp->getPositionGlobal());
+					gPipeline.addObject(bubble);
+				}*/
+
+				// Do the kill
+				gObjectList.killObject(objectp);
+			}
+			else
+			{
+				//LL_WARNS("Messaging") << "Object in UUID lookup, but not on object list in kill!" << LL_ENDL;
+				//gObjectList.mNumUnknownKills++;
+			}
+		}
+		return true;
+	}
+};
+
 class LLObjectEnableSaveAs : public view_listener_t
 {
 	bool handleEvent(LLPointer<LLEvent> event, const LLSD& userdata)
@@ -8525,6 +8576,7 @@ void initialize_menus()
 	addMenu(new LLObjectMute(), "Object.Mute");
 	addMenu(new LLObjectBuy(), "Object.Buy");
 	addMenu(new LLObjectEdit(), "Object.Edit");
+	addMenu(new LLObjectDerender(), "Object.DERENDER");
 	addMenu(new LLObjectInspect(), "Object.Inspect");
 
 	addMenu(new LLObjectEnableOpen(), "Object.EnableOpen");
