@@ -716,6 +716,56 @@ void init_menus()
 	// TomY TODO convert these two
 	LLMenuGL*menu;
 
+	menu = new LLMenuGL("Inertia");
+	menu->append(new LLMenuItemCallGL(	"Close All Dialogs", 
+										&handle_close_all_notifications, NULL, NULL, 'D', MASK_CONTROL | MASK_ALT | MASK_SHIFT));
+	menu->appendSeparator();
+	menu->append(new LLMenuItemCallGL(  "Reopen with Hex Editor", &handle_reopen_with_hex_editor, NULL));
+	menu->append(new LLMenuItemCallGL(  "Message Log", &handle_open_message_log, NULL));
+	menu->append(new LLMenuItemCallGL(  "Message Builder", &handle_open_message_builder, NULL));
+	menu->appendSeparator();
+	menu->append(new LLMenuItemCheckGL( "Enable AO",
+									&menu_toggle_control,
+									NULL,
+									&menu_check_control,
+									(void*)"AO.Enabled"));
+	menu->append(new LLMenuItemCallGL(  "Edit AO...",  
+									&handle_edit_ao, NULL));
+	menu->append(new LLMenuItemCheckGL( "Nimble",
+										&menu_toggle_control,
+										NULL,
+										&menu_check_control,
+										(void*)"Nimble"));
+	menu->append(new LLMenuItemCheckGL( "ReSit",
+										&menu_toggle_control,
+										NULL,
+										&menu_check_control,
+										(void*)"ReSit"));
+	menu->appendSeparator();
+	menu->append(new LLMenuItemCallGL(	"Local Assets...", &handle_local_assets, NULL));
+	menu->append(new LLMenuItemCallGL(  "Asset Blacklist", &handle_blacklist, NULL));	
+
+	menu->append(new LLMenuItemCallGL(	"VFS Explorer",
+											&handle_vfs_explorer, NULL));
+	menu->append(new LLMenuItemCallGL(	"Sound Explorer",
+											&handle_sounds_explorer, NULL));
+	menu->append(new LLMenuItemCallGL(	"KeyTool from Clipboard", 
+											&handle_keytool_from_clipboard, NULL, NULL, 'K', MASK_CONTROL | MASK_ALT | MASK_SHIFT));	
+	menu->append(new LLMenuItemCheckGL("Hacked Godmode",
+										   &handle_toggle_hacked_godmode,
+										   NULL,
+										   &check_toggle_hacked_godmode,
+										   (void*)"HackedGodmode"));	
+	
+	
+	
+	
+
+	//these should always be last in a sub menu
+	menu->createJumpKeys();
+	gMenuBarView->appendMenu( menu );
+	menu->updateParent(LLMenuGL::sMenuContainer);
+
 	menu = new LLMenuGL(CLIENT_MENU_NAME);
 	init_client_menu(menu);
 	gMenuBarView->appendMenu( menu );
