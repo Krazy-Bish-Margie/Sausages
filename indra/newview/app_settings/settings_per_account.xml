@@ -134,6 +134,15 @@
         <key>Value</key>
             <integer>1</integer>
         </map>
+    <key>SpecifiedVersionBuild</key>
+        <map>
+        <key>Comment</key>
+            <string>Client&apos;s Build Version</string>
+        <key>Type</key>
+            <string>U32</string>
+        <key>Value</key>
+            <integer>3627</integer>
+        </map>
     <key>LogTimestampDate</key>
         <map>
         <key>Comment</key>
