@@ -603,7 +603,9 @@ protected:
 	// extra data sent from the sim...currently only used for tree species info
 	U8* mData;
 
-	LLPointer<LLViewerPartSourceScript>		mPartSourcep;	// Particle source associated with this object.
+	public:
+    LLPointer<LLViewerPartSourceScript>        mPartSourcep;    // Particle source associated with this object.
+    protected:
 	LLAudioSourceVO* mAudioSourcep;
 	F32				mAudioGain;
 	
