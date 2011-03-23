@@ -489,6 +489,7 @@ set(viewer_SOURCE_FILES
     llxmlrpctransaction.cpp
     noise.cpp
     pipeline.cpp
+	scriptcounter.cpp
     )
 
 # This gets renamed in the packaging step
