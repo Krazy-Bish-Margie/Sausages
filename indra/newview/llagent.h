@@ -785,6 +785,9 @@ public:
 	static int lure_y;
 	static int lure_z;
 	static std::string lure_maturity;
+	
+	static LLVector3 exlStartMeasurePoint;
+	static LLVector3 exlEndMeasurePoint;
 	// </edit>
 
 	S32				mNumPendingQueries;
