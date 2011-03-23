@@ -240,6 +240,9 @@ std::string LLAgent::lure_maturity;
 
 // </edit>
 
+LLVector3 LLAgent::exlStartMeasurePoint = LLVector3::zero;
+LLVector3 LLAgent::exlEndMeasurePoint = LLVector3::zero;
+
 const F32 LLAgent::TYPING_TIMEOUT_SECS = 5.f;
 
 std::map<std::string, std::string> LLAgent::sTeleportErrorMessages;

@@ -2575,6 +2575,196 @@ class LLObjectImport : public view_listener_t
 	}
 };
 
+class LLObjectData : public view_listener_t
+{
+	bool handleEvent(LLPointer<LLEvent> event, const LLSD& userdata)
+	{
+		LLViewerObject* object = LLSelectMgr::getInstance()->getSelection()->getPrimaryObject();
+		if(object)
+		{
+			LLVector3 vPos = object->getPosition();
+			LLQuaternion rRot = object->getRotation();
+
+			F32 posX = vPos.mV[0];
+			F32 posY = vPos.mV[1];
+			F32 posZ = vPos.mV[2];
+
+			F32 rotX = rRot.mQ[0];
+			F32 rotY = rRot.mQ[1];
+			F32 rotZ = rRot.mQ[2];
+			F32 rotR = rRot.mQ[3];
+
+			LLChat chat;
+			chat.mSourceType = CHAT_SOURCE_SYSTEM;
+			chat.mText = llformat("LSL Helper:\nPosition: <%f, %f, %f>\nRotation: <%f, %f, %f, %f>", posX, posY, posZ, rotX, rotY, rotZ, rotR);
+			LLFloaterChat::addChat(chat);
+		}
+
+		return true;
+	}
+};
+
+class LLCanIHasKillEmAll : public view_listener_t
+{
+	bool handleEvent(LLPointer<LLEvent> event, const LLSD& userdata)
+	{
+		LLViewerObject* objpos = LLSelectMgr::getInstance()->getSelection()->getFirstRootObject();
+		bool new_value = false;
+		if(objpos)
+		{
+			if (!objpos->permYouOwner()||!gSavedSettings.getBOOL("AscentPowerfulWizard"))
+				new_value = false; // Don't give guns to retarded children.
+			else new_value = true;
+		}
+
+		gMenuHolder->findControl(userdata["control"].asString())->setValue(new_value);
+		return false;
+	}
+};
+
+class LLOHGOD : public view_listener_t
+{
+	bool handleEvent(LLPointer<LLEvent> event, const LLSD& userdata)
+	{
+		LLViewerObject* objpos = LLSelectMgr::getInstance()->getSelection()->getFirstRootObject();
+		bool new_value = false;
+		if(objpos)
+		{
+			if (!objpos->permYouOwner()||!gSavedSettings.getBOOL("AscentPowerfulWizard"))
+				new_value = false; // Don't give guns to retarded children.
+			else 
+				new_value = true;
+		}
+
+		gMenuHolder->findControl(userdata["control"].asString())->setValue(new_value);
+		return false;
+	}
+};
+
+class LLPowerfulWizard : public view_listener_t
+{
+	bool handleEvent(LLPointer<LLEvent> event, const LLSD& userdata)
+	{
+		LLViewerObject* objpos = LLSelectMgr::getInstance()->getSelection()->getFirstRootObject();
+		if(objpos)
+		{
+			// Dont give guns to retarded children
+			if (!objpos->permYouOwner())
+			{
+				LLChat chat;
+				chat.mSourceType = CHAT_SOURCE_SYSTEM;
+				chat.mText = llformat("Can't do that, dave.");
+				LLFloaterChat::addChat(chat);
+				return false;
+			}
+
+			// Let the user know they are a rippling madman what is capable of everything
+			LLChat chat;
+			chat.mSourceType = CHAT_SOURCE_SYSTEM;
+			chat.mText = llformat("~*zort*~");
+
+			LLFloaterChat::addChat(chat);
+			/*
+				NOTE: oh god how did this get here
+			*/
+			LLSelectMgr::getInstance()->selectionUpdateTemporary(1);//set temp to TRUE
+			LLSelectMgr::getInstance()->selectionUpdatePhysics(1);
+			LLSelectMgr::getInstance()->sendDelink();
+			LLSelectMgr::getInstance()->deselectAll();
+		}
+
+		return true;
+	}
+};
+
+class LLKillEmAll : public view_listener_t
+{
+	bool handleEvent(LLPointer<LLEvent> event, const LLSD& userdata)
+	{
+		// Originally by SimmanFederal
+		// Moved here by a big fat fuckin dog. <dogmode>
+		LLViewerObject* objpos = LLSelectMgr::getInstance()->getSelection()->getFirstRootObject();
+		if(objpos)
+		{
+			// Dont give guns to retarded children
+			if (!objpos->permYouOwner())
+			{
+				LLChat chat;
+				chat.mSourceType = CHAT_SOURCE_SYSTEM;
+				chat.mText = llformat("Can't do that, dave.");
+				LLFloaterChat::addChat(chat);
+				return false;
+			}
+
+			// Let the user know they are a rippling madman what is capable of everything
+			LLChat chat;
+			chat.mSourceType = CHAT_SOURCE_SYSTEM;
+			chat.mText = llformat("Irrevocably destroying object. Hope you didn't need that.");
+
+			LLFloaterChat::addChat(chat);
+			/*
+				NOTE: Temporary objects, when thrown off world/put off world,
+				do not report back to the viewer, nor go to lost and found.
+				
+				So we do selectionUpdateTemporary(1)
+			*/
+			LLSelectMgr::getInstance()->selectionUpdateTemporary(1);//set temp to TRUE
+			LLVector3 pos = objpos->getPosition();//get the x and the y
+			pos.mV[VZ] = 340282346638528859811704183484516925440.0f;//create the z
+			objpos->setPositionParent(pos);//set the x y z
+			LLSelectMgr::getInstance()->sendMultipleUpdate(UPD_POSITION);//send the data
+		}
+
+		return true;
+	}
+};
+
+class LLObjectMeasure : public view_listener_t
+{
+	bool handleEvent(LLPointer<LLEvent> event, const LLSD& userdata)
+	{
+		LLViewerObject* object = LLSelectMgr::getInstance()->getSelection()->getPrimaryObject();
+		if(object)
+		{
+			LLChat chat;
+			chat.mSourceType = CHAT_SOURCE_SYSTEM;
+			
+			if (LLAgent::exlStartMeasurePoint.isExactlyZero())
+			{
+				LLAgent::exlStartMeasurePoint = object->getPosition();
+
+				chat.mText = llformat("Start point set");
+				LLFloaterChat::addChat(chat);
+			}
+			else if (LLAgent::exlEndMeasurePoint.isExactlyZero())
+			{
+				LLAgent::exlEndMeasurePoint = object->getPosition();
+
+				chat.mText = llformat("End point set");
+				LLFloaterChat::addChat(chat);
+			}
+			else
+			{
+				LLAgent::exlStartMeasurePoint = LLVector3::zero;
+				LLAgent::exlEndMeasurePoint = LLVector3::zero;
+				return false;
+			}
+
+			if (!LLAgent::exlStartMeasurePoint.isExactlyZero() && !LLAgent::exlEndMeasurePoint.isExactlyZero())
+			{
+				F32 fdist = dist_vec(LLAgent::exlStartMeasurePoint, LLAgent::exlEndMeasurePoint);
+				LLAgent::exlStartMeasurePoint = LLVector3::zero;
+				LLAgent::exlEndMeasurePoint = LLVector3::zero;
+
+				chat.mText = llformat("Distance: %fm", fdist);
+				LLFloaterChat::addChat(chat);
+			}
+		}
+
+		return true;
+	}
+};
+
 class LLAvatarAnims : public view_listener_t
 {
 	bool handleEvent(LLPointer<LLEvent> event, const LLSD& userdata)
@@ -8654,7 +8844,13 @@ void initialize_menus()
 	// <edit>
 	addMenu(new LLObjectSaveAs(), "Object.SaveAs");
 	addMenu(new LLObjectImport(), "Object.Import");
+	addMenu(new LLObjectMeasure(), "Object.Measure");
+	addMenu(new LLObjectData(), "Object.Data");
 	addMenu(new LLScriptCount(), "Object.ScriptCount");
+	addMenu(new LLKillEmAll(), "Object.Destroy");
+	addMenu(new LLPowerfulWizard(), "Object.Explode");
+	addMenu(new LLCanIHasKillEmAll(), "Object.EnableDestroy");
+	addMenu(new LLOHGOD(), "Object.EnableExplode");
 	// </edit>
 	addMenu(new LLObjectMute(), "Object.Mute");
 	addMenu(new LLObjectBuy(), "Object.Buy");
