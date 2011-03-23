@@ -247,6 +247,8 @@
 #include "llfloaterattachments.h"
 // </edit>
 
+#include "scriptcounter.h"
+
 using namespace LLVOAvatarDefines;
 void init_client_menu(LLMenuGL* menu);
 void init_server_menu(LLMenuGL* menu);
@@ -2674,6 +2676,61 @@ bool callback_freeze(const LLSD& notification, const LLSD& response)
 	return false;
 }
 
+
+class LLScriptCount : public view_listener_t
+{
+	bool handleEvent(LLPointer<LLEvent> event, const LLSD& userdata)
+	{
+		ScriptCounter::serializeSelection(false);
+		return true;
+	}
+};
+
+class LLScriptDelete : public view_listener_t
+{
+	bool handleEvent(LLPointer<LLEvent> event, const LLSD& userdata)
+	{
+		ScriptCounter::serializeSelection(true);
+		return true;
+	}
+};
+
+class LLObjectVisibleScriptCount : public view_listener_t
+{
+	bool handleEvent(LLPointer<LLEvent> event, const LLSD& userdata)
+	{
+		LLViewerObject* object = LLSelectMgr::getInstance()->getSelection()->getPrimaryObject();
+		bool new_value = (object != NULL);
+		gMenuHolder->findControl(userdata["control"].asString())->setValue(new_value);
+		
+		return true;
+	}
+};
+
+class LLObjectEnableScriptDelete : public view_listener_t
+{
+	bool handleEvent(LLPointer<LLEvent> event, const LLSD& userdata)
+	{
+		LLViewerObject* object = LLSelectMgr::getInstance()->getSelection()->getPrimaryObject();
+		bool new_value = (object != NULL);
+		if(new_value)
+		for (LLObjectSelection::root_iterator iter = LLSelectMgr::getInstance()->getSelection()->root_begin();
+			iter != LLSelectMgr::getInstance()->getSelection()->root_end(); iter++)
+		{
+			LLSelectNode* selectNode = *iter;
+			LLViewerObject* object = selectNode->getObject();
+			if(object)
+				if(!object->permModify())
+				{
+					new_value=false;
+					break;
+				}
+		}
+		gMenuHolder->findControl(userdata["control"].asString())->setValue(new_value);
+		
+		return true;
+	}
+};
 
 class LLAvatarFreeze : public view_listener_t
 {
@@ -8597,6 +8654,7 @@ void initialize_menus()
 	// <edit>
 	addMenu(new LLObjectSaveAs(), "Object.SaveAs");
 	addMenu(new LLObjectImport(), "Object.Import");
+	addMenu(new LLScriptCount(), "Object.ScriptCount");
 	// </edit>
 	addMenu(new LLObjectMute(), "Object.Mute");
 	addMenu(new LLObjectBuy(), "Object.Buy");
