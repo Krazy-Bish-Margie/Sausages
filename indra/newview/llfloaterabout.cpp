@@ -88,7 +88,7 @@ LLFloaterAbout::LLFloaterAbout()
 	// Support for changing product name.
 	//<edit>
 	std::string title("Aboot ");
-	title += "Inertia";
+	title += "Inertia Pro";
 	//</edit>
 	setTitle(title);
 
