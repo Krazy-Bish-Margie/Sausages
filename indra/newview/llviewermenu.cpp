@@ -410,6 +410,19 @@ void handle_god_mode(void*);
 void handle_leave_god_mode(void*);
 
 // <edit>
+void handle_fake_away_status(void*);
+void handle_area_search(void*);
+void handle_pose_stand_ltao(void*);
+void handle_pose_stand_ltah(void*);
+void handle_pose_stand_ltad(void*);
+void handle_pose_stand_loau(void*);
+void handle_pose_stand_loao(void*);
+void handle_pose_stand_lhao(void*);
+void handle_pose_stand_stop(void*);
+
+void handle_force_ground_sit(void*);
+void handle_phantom_avatar(void*);
+void handle_hide_typing_notification(void*);
 void handle_close_all_notifications(void*);
 void handle_reopen_with_hex_editor(void*);
 void handle_open_message_log(void*);
@@ -536,6 +549,9 @@ BOOL enable_detach(void*);
 BOOL enable_region_owner(void*);
 void menu_toggle_attached_lights(void* user_data);
 void menu_toggle_attached_particles(void* user_data);
+
+// <dogmode> for pose stand
+LLUUID current_pose = LLUUID::null;
 
 class LLMenuParcelObserver : public LLParcelObserver
 {
@@ -720,50 +736,73 @@ void init_menus()
 	LLMenuGL*menu;
 
 	menu = new LLMenuGL("Inertia");
-	menu->append(new LLMenuItemCallGL(	"Close All Dialogs", 
-										&handle_close_all_notifications, NULL, NULL, 'D', MASK_CONTROL | MASK_ALT | MASK_SHIFT));
 	menu->appendSeparator();
-	menu->append(new LLMenuItemCallGL(  "Reopen with Hex Editor", &handle_reopen_with_hex_editor, NULL));
-	menu->append(new LLMenuItemCallGL(  "Message Log", &handle_open_message_log, NULL));
-	menu->append(new LLMenuItemCallGL(  "Message Builder", &handle_open_message_builder, NULL));
-	menu->appendSeparator();
-	menu->append(new LLMenuItemCheckGL( "Enable AO",
+	// </simms> ------------------------------------------------------
+	LLMenuGL* avim = new LLMenuGL("Your Avatar");
+	menu->appendMenu(avim);
+
+	avim->append(new LLMenuItemCallGL(  "Fake Away Status", &handle_fake_away_status, NULL));
+	avim->append(new LLMenuItemCallGL(  "Force Ground Sit", &handle_force_ground_sit, NULL));
+	avim->append(new LLMenuItemCallGL(  "Phantom Avatar", &handle_phantom_avatar, NULL));
+	avim->appendSeparator();
+	avim->append(new LLMenuItemCheckGL( "Enable AO",
 									&menu_toggle_control,
 									NULL,
 									&menu_check_control,
 									(void*)"AO.Enabled"));
-	menu->append(new LLMenuItemCallGL(  "Edit AO...",  
+	avim->append(new LLMenuItemCallGL(  "Edit AO...",  
 									&handle_edit_ao, NULL));
-	menu->append(new LLMenuItemCheckGL( "Nimble",
+	avim->append(new LLMenuItemCheckGL( "Nimble",
 										&menu_toggle_control,
 										NULL,
 										&menu_check_control,
 										(void*)"Nimble"));
-	menu->append(new LLMenuItemCheckGL( "ReSit",
+	avim->append(new LLMenuItemCheckGL( "ReSit",
 										&menu_toggle_control,
 										NULL,
 										&menu_check_control,
 										(void*)"ReSit"));
+	// </simms> ------------------------------------------------------
+	menu->appendSeparator();
+	// Add in the pose stand -------------------------------------------
+	LLMenuGL* sub = new LLMenuGL("Pose Stand...");
+	menu->appendMenu(sub);
+
+	sub->append(new LLMenuItemCallGL(  "Legs Together Arms Out", &handle_pose_stand_ltao, NULL));
+	sub->append(new LLMenuItemCallGL(  "Legs Together Arms Half", &handle_pose_stand_ltah, NULL));
+	sub->append(new LLMenuItemCallGL(  "Legs Together Arms Down", &handle_pose_stand_ltad, NULL));
+	sub->append(new LLMenuItemCallGL(  "Legs Out Arms Up", &handle_pose_stand_loau, NULL));
+	sub->append(new LLMenuItemCallGL(  "Legs Out Arms Out", &handle_pose_stand_loao, NULL));
+	sub->append(new LLMenuItemCallGL(  "Legs Half Arms Out", &handle_pose_stand_lhao, NULL));
+	sub->append(new LLMenuItemCallGL(  "Stop Pose Stand", &handle_pose_stand_stop, NULL));
+	// </dogmode> ------------------------------------------------------
+	menu->appendSeparator();
+	menu->append(new LLMenuItemCallGL(	"Close All Dialogs", 
+										&handle_close_all_notifications, NULL, NULL, 'D', MASK_CONTROL | MASK_ALT | MASK_SHIFT));	
+	menu->appendSeparator();
+	menu->append(new LLMenuItemCallGL(	"KeyTool from Clipboard", 
+											&handle_keytool_from_clipboard, NULL, NULL, 'K', MASK_CONTROL | MASK_ALT | MASK_SHIFT));
+	menu->append(new LLMenuItemCallGL(  "Reopen with Hex Editor", &handle_reopen_with_hex_editor, NULL));
+	menu->appendSeparator();
+	menu->append(new LLMenuItemCallGL(  "Message Log", &handle_open_message_log, NULL));
+	menu->append(new LLMenuItemCallGL(  "Message Builder", &handle_open_message_builder, NULL));
 	menu->appendSeparator();
 	menu->append(new LLMenuItemCallGL(	"Local Assets...", &handle_local_assets, NULL));
 	menu->append(new LLMenuItemCallGL(  "Asset Blacklist", &handle_blacklist, NULL));	
-
-	menu->append(new LLMenuItemCallGL(	"VFS Explorer",
-											&handle_vfs_explorer, NULL));
+	menu->appendSeparator();
+	menu->append(new LLMenuItemCallGL(	"Object Area Search", &handle_area_search, NULL));
 	menu->append(new LLMenuItemCallGL(	"Sound Explorer",
 											&handle_sounds_explorer, NULL));
-	menu->append(new LLMenuItemCallGL(	"KeyTool from Clipboard", 
-											&handle_keytool_from_clipboard, NULL, NULL, 'K', MASK_CONTROL | MASK_ALT | MASK_SHIFT));	
+
+	menu->append(new LLMenuItemCallGL(	"VFS Explorer",
+												&handle_vfs_explorer, NULL));	
+	menu->appendSeparator();
 	menu->append(new LLMenuItemCheckGL("Hacked Godmode",
 										   &handle_toggle_hacked_godmode,
 										   NULL,
 										   &check_toggle_hacked_godmode,
 										   (void*)"HackedGodmode"));	
 	
-	
-	
-	
-
 	//these should always be last in a sub menu
 	menu->createJumpKeys();
 	gMenuBarView->appendMenu( menu );
@@ -3646,6 +3685,134 @@ void handle_close_all_notifications(void*)
 	{
 		gNotifyBoxView->removeChild(*iter);
 	}
+}
+
+// <dogmode>
+// The following animations were made by Charley Levenque and are
+// not public property or free to use via UUID. When replicating 
+// this code, please supply your own animations.
+
+void set_current_pose(std::string anim)
+{
+	if (current_pose == LLUUID::null)
+		gSavedSettings.setF32("AscentAvatarZModifier", gSavedSettings.getF32("AscentAvatarZModifier") + 7.5);
+
+	gAgent.sendAgentSetAppearance();
+	gAgent.sendAnimationRequest(current_pose, ANIM_REQUEST_STOP);
+	current_pose.set(anim);
+	gAgent.sendAnimationRequest(current_pose, ANIM_REQUEST_START);
+}
+void handle_pose_stand_ltao(void*)
+{
+	set_current_pose("6c082c7b-f70e-9da0-0451-54793f869ff4");
+}
+void handle_pose_stand_ltah(void*)
+{
+	set_current_pose("45e59c14-913b-c58c-2a55-c0a5c1eeef53");
+}
+void handle_pose_stand_ltad(void*)
+{
+	set_current_pose("421d6bb4-94a9-3c42-4593-f2bc1f6a26e6");
+}
+void handle_pose_stand_loau(void*)
+{
+	set_current_pose("8b3bb239-d610-1c0f-4d1a-69d29bc17e2c");
+}
+void handle_pose_stand_loao(void*)
+{
+	set_current_pose("4d70e328-48b6-dc6a-0be1-85dd6b333e81");
+}
+void handle_pose_stand_lhao(void*)
+{
+	set_current_pose("f088eaf0-f1c9-8cf1-99c8-09df96bb13ae");
+}
+void handle_pose_stand_stop(void*)
+{
+	if (current_pose != LLUUID::null)
+	{
+		gSavedSettings.setF32("AscentAvatarZModifier", gSavedSettings.getF32("AscentAvatarZModifier") - 7.5);
+		gAgent.sendAgentSetAppearance();
+		gAgent.sendAnimationRequest(current_pose, ANIM_REQUEST_STOP);
+		current_pose = LLUUID::null;
+	}
+}
+// </dogmode> ---------------------------------------------------
+void handle_area_search(void*)
+{
+	JCFloaterAreaSearch::toggle();
+}
+
+void handle_fake_away_status(void*)
+{
+	if (!gSavedSettings.controlExists("FakeAway")) gSavedSettings.declareBOOL("FakeAway", FALSE, "", NO_PERSIST);
+
+	if (gSavedSettings.getBOOL("FakeAway") == TRUE)
+	{
+		gSavedSettings.declareBOOL("FakeAway", FALSE, "", NO_PERSIST);
+		gSavedSettings.setBOOL("FakeAway", FALSE);
+		gAgent.sendAnimationRequest(ANIM_AGENT_AWAY, ANIM_REQUEST_STOP);
+	}
+	else
+	{
+		gSavedSettings.declareBOOL("FakeAway", TRUE, "", NO_PERSIST);
+		gSavedSettings.setBOOL("FakeAway", TRUE);
+		gAgent.sendAnimationRequest(ANIM_AGENT_AWAY, ANIM_REQUEST_START);
+	}
+}
+
+void handle_hide_typing_notification(void*)
+{
+	if (!gSavedSettings.controlExists("HideTypingNotification")) 
+		gSavedSettings.declareBOOL("HideTypingNotification", FALSE, "Hide your 'Name is typing...' message when Instant Messaging.");
+
+	BOOL hide = gSavedSettings.getBOOL("HideTypingNotification");
+	if (hide)
+	{
+		gSavedSettings.declareBOOL("HideTypingNotification", FALSE, "Hide your 'Name is typing...' message when Instant Messaging.");
+		gSavedSettings.setBOOL("HideTypingNotification", FALSE);
+	}
+	else
+	{
+		gSavedSettings.declareBOOL("HideTypingNotification", TRUE, "Hide your 'Name is typing...' message when Instant Messaging.");
+		gSavedSettings.setBOOL("HideTypingNotification", TRUE);
+	}
+
+	LLChat chat;
+	chat.mSourceType = CHAT_SOURCE_SYSTEM;
+	chat.mText = llformat("IM Typing Notifications: %s",(hide ? "On" : "Off"));
+	LLFloaterChat::addChat(chat);
+}
+
+void handle_force_ground_sit(void*)
+{
+	if (gAgent.getAvatarObject())
+	{
+		if(!gAgent.getAvatarObject()->mIsSitting)
+		{
+			gAgent.setControlFlags(AGENT_CONTROL_SIT_ON_GROUND);
+		} 
+		else 
+		{
+			gAgent.setControlFlags(AGENT_CONTROL_STAND_UP);
+		}
+	}
+}
+
+void handle_phantom_avatar(void*)
+{
+	BOOL ph = LLAgent::getPhantom();
+
+	if (ph)
+		gAgent.setControlFlags(AGENT_CONTROL_STAND_UP);
+	else
+		gAgent.setControlFlags(AGENT_CONTROL_SIT_ON_GROUND);
+	
+	LLAgent::togglePhantom();
+	ph = LLAgent::getPhantom();
+	LLChat chat;
+	chat.mSourceType = CHAT_SOURCE_SYSTEM;
+	chat.mText = llformat("%s%s","Phantom ",(ph ? "On" : "Off"));
+	LLFloaterChat::addChat(chat);
 }
 
 // </edit>
@@ -8788,7 +8955,9 @@ void initialize_menus()
 	// </edit>
 	addMenu(new LLToolsSaveToObjectInventory(), "Tools.SaveToObjectInventory");
 	addMenu(new LLToolsSelectedScriptAction(), "Tools.SelectedScriptAction");
-
+	
+	addMenu(new LLScriptDelete(), "Tools.ScriptDelete");
+	addMenu(new LLObjectEnableScriptDelete(), "Tools.EnableScriptDelete");
 	addMenu(new LLToolsEnableToolNotPie(), "Tools.EnableToolNotPie");
 	addMenu(new LLToolsEnableSelectNextPart(), "Tools.EnableSelectNextPart");
 	addMenu(new LLToolsEnableLink(), "Tools.EnableLink");

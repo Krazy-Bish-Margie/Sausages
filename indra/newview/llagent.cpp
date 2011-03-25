@@ -240,6 +240,8 @@ std::string LLAgent::lure_maturity;
 
 // </edit>
 
+BOOL LLAgent::exlPhantom = 0;
+BOOL LLAgent::mForceTPose = 0;
 LLVector3 LLAgent::exlStartMeasurePoint = LLVector3::zero;
 LLVector3 LLAgent::exlEndMeasurePoint = LLVector3::zero;
 
@@ -801,6 +803,18 @@ BOOL LLAgent::canFly()
 	return parcel->getAllowFly();
 }
 
+// Better Set Phantom options ~Charbl
+void LLAgent::setPhantom(BOOL phantom)
+{
+	exlPhantom = phantom;
+}
+
+BOOL LLAgent::getPhantom()
+{
+	return exlPhantom;
+}
+
+//
 
 //-----------------------------------------------------------------------------
 // setFlying()
@@ -858,6 +872,20 @@ void LLAgent::toggleFlying()
 
 	setFlying( fly );
 	resetView();
+}
+
+void LLAgent::togglePhantom()
+{
+	BOOL phan = !(exlPhantom);
+
+	setPhantom( phan );
+}
+
+void LLAgent::toggleTPosed()
+{
+	BOOL posed = !(mForceTPose);
+
+	setTPosed(posed);
 }
 
 
