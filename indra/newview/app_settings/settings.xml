@@ -6610,7 +6610,7 @@
     <key>Type</key>
     <string>Boolean</string>
     <key>Value</key>
-    <integer>1</integer>
+    <integer>0</integer>
   </map>
   <key>MediaFilterRect</key>
   <map>
@@ -13625,3 +13625,4 @@
     </map>
 </map>
 </llsd>
+>>>>>>> 15216f322caa066048902e5cd1c5ad9a7677c2fa

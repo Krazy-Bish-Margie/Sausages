@@ -102,7 +102,7 @@
 
 using namespace LLVOAvatarDefines;
 
-// Mighty Mark Mac to stop the strnlen errors on build
+// for macs to stop the strnlen errors on build
 #if LL_DARWIN
 size_t strnlen(const char *s, size_t n)
 {
@@ -10213,3 +10213,4 @@ F32 calc_bouncy_animation(F32 x)
 {
 	return -(cosf(x * F_PI * 2.5f - F_PI_BY_TWO))*(0.4f + x * -0.1f) + x * 1.3f;
 }
+>>>>>>> 15216f322caa066048902e5cd1c5ad9a7677c2fa
