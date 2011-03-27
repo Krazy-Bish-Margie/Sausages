@@ -3357,9 +3357,12 @@ void LLAppViewer::idle()
     
 	    if (flags_changed || (agent_update_time > (1.0f / (F32) AGENT_UPDATES_PER_SECOND)))
 	    {
-		    // Send avatar and camera info
+		     // Send avatar and camera info
 		    last_control_flags = gAgent.getControlFlags();
-		    send_agent_update(TRUE);
+		    if(!gAgent.getPhantom())
+			{
+				send_agent_update(TRUE);
+			}
 		    agent_update_timer.reset();
 	    }
 	}
