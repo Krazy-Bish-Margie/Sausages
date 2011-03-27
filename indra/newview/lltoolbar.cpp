@@ -129,8 +129,8 @@ BOOL LLToolBar::postBuild()
 	childSetAction("appearance_btn", onClickAppearance, this);
 	childSetControlName("appearance_btn", "");
 
-	childSetAction("radar_list_btn", onClickRadarList, this);
-	childSetControlName("radar_list_btn", "RadarListBtnState");
+	childSetAction("fly_btn", onClickFly, this);
+	childSetControlName("fly_btn", "FlyBtnState");
 
 	childSetAction("sit_btn", onClickSit, this);
 	childSetControlName("sit_btn", "SitBtnState");
@@ -153,6 +153,9 @@ BOOL LLToolBar::postBuild()
 	childSetAction("inventory_btn", onClickInventory, this);
 	childSetControlName("inventory_btn", "ShowInventory");
 
+	childSetAction("radar_list_btn", onClickRadarList, this);
+	childSetControlName("radar_list_btn", "RadarListBtnState");
+	
 	for (child_list_const_iter_t child_iter = getChildList()->begin();
 		 child_iter != getChildList()->end(); ++child_iter)
 	{
