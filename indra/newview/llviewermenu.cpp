@@ -410,6 +410,8 @@ void handle_god_mode(void*);
 void handle_leave_god_mode(void*);
 
 // <edit>
+void handle_tp_ground(void*);
+void handle_tp_safe(void*);
 void handle_fake_away_status(void*);
 void handle_area_search(void*);
 void handle_pose_stand_ltao(void*);
@@ -734,8 +736,24 @@ void init_menus()
 
 	// TomY TODO convert these two
 	LLMenuGL*menu;
-
 	menu = new LLMenuGL("Inertia");
+	
+	LLMenuGL* avtp = new LLMenuGL("Teleport");
+	menu->appendMenu(avtp);
+
+	avtp->append(new LLMenuItemCallGL(  "Tp To Safe Range", &handle_tp_safe, NULL));
+	avtp->append(new LLMenuItemCallGL(  "Tp To Ground", &handle_tp_ground, NULL));
+	avtp->appendSeparator();
+	avtp->append(new LLMenuItemCheckGL("Double-Click Auto-Pilot", 
+		menu_toggle_control, NULL, menu_check_control, 
+		(void*)"DoubleClickAutoPilot"));
+	// add for double click teleport support
+	avtp->append(new LLMenuItemCheckGL("Double-Click Teleport", 
+		menu_toggle_control, NULL, menu_check_control, 
+		(void*)"DoubleClickTeleport"));
+	avtp->appendSeparator();
+	avtp->append(new LLMenuItemCallGL("Url Teleport Region", 
+			&LLFloaterTeleport::show, NULL, NULL));
 	menu->appendSeparator();
 	// </simms> ------------------------------------------------------
 	LLMenuGL* avim = new LLMenuGL("Your Avatar");
@@ -850,45 +868,10 @@ void init_client_menu(LLMenuGL* menu)
 	// <edit>
 	{
 		LLMenuGL* sub = NULL;
-		sub = new LLMenuGL("Useful Features");
+		sub = new LLMenuGL("Griffer TODO");
 		sub->append(new LLMenuItemCallGL(	"Close All Dialogs", 
 											&handle_close_all_notifications, NULL, NULL, 'D', MASK_CONTROL | MASK_ALT | MASK_SHIFT));
 
-		sub->append(new LLMenuItemCallGL(	"Reopen with Hex Editor", 
-											&handle_reopen_with_hex_editor, NULL));	
-										
-		sub->append(new LLMenuItemCallGL(  "Message Log", &handle_open_message_log, NULL));
-		sub->append(new LLMenuItemCallGL(  "Message Builder", &handle_open_message_builder, NULL));	
-
-		sub->append(new LLMenuItemCallGL(	"Local Assets...",
-												&handle_local_assets, NULL));
-		sub->append(new LLMenuItemCallGL(	"VFS Explorer",
-												&handle_vfs_explorer, NULL));
-		sub->append(new LLMenuItemCallGL(	"Sound Explorer",
-												&handle_sounds_explorer, NULL));
-		sub->append(new LLMenuItemCallGL(	"Asset Blacklist",
-												&handle_blacklist, NULL));
-
-		sub->append(new LLMenuItemCallGL(	"KeyTool from Clipboard",
-											&handle_keytool_from_clipboard, NULL, NULL, 'K', MASK_CONTROL | MASK_ALT | MASK_SHIFT));
-		
-		sub->append(new LLMenuItemCheckGL( "Enable AO",
-										&menu_toggle_control,
-										NULL,
-										&menu_check_control,
-										(void*)"AO.Enabled"));
-		sub->append(new LLMenuItemCallGL(  "Edit AO...",  
-										&handle_edit_ao, NULL));
-		sub->append(new LLMenuItemCheckGL( "Nimble",
-											&menu_toggle_control,
-											NULL,
-											&menu_check_control,
-											(void*)"Nimble"));
-		sub->append(new LLMenuItemCheckGL( "ReSit",
-											&menu_toggle_control,
-											NULL,
-											&menu_check_control,
-											(void*)"ReSit"));
 		//these should always be last in a sub menu
 		sub->createJumpKeys();
 		menu->appendMenu(sub);
@@ -3740,6 +3723,31 @@ void handle_pose_stand_stop(void*)
 void handle_area_search(void*)
 {
 	JCFloaterAreaSearch::toggle();
+}
+//Simms TP 
+void handle_tp_ground(void*)
+{
+	float height = 20.0;
+			LLVector3 pos = gAgent.getPositionAgent();
+			pos.mV[VZ] = height;
+			gAgent.teleportRequest(gAgent.getRegion()->getHandle(), pos);
+	   			LLChat chat;
+			chat.mSourceType = CHAT_SOURCE_SYSTEM;
+			chat.mText = llformat("Moving Avatar To Ground Level");
+			LLFloaterChat::addChat(chat);	
+}
+
+void handle_tp_safe(void*)
+{
+	float height = 4000.0;
+			LLVector3 pos = gAgent.getPositionAgent();
+			pos.mV[VZ] = height;
+			gAgent.teleportRequest(gAgent.getRegion()->getHandle(), pos);
+	   		gAgent.setFlying(TRUE);	
+				LLChat chat;
+			chat.mSourceType = CHAT_SOURCE_SYSTEM;
+			chat.mText = llformat("Moving Avatar To Safe Level");
+			LLFloaterChat::addChat(chat);	
 }
 
 void handle_fake_away_status(void*)

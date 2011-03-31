@@ -348,9 +348,21 @@ BOOL LLFilePicker::getSaveFile(ESaveFilter filter, const std::string& filename)
 			L"All Files (*.*)\0*.*\0" \
 			L"WAV Sounds (*.wav)\0*.wav\0" \
 			L"Targa, Bitmap Images (*.tga; *.bmp)\0*.tga;*.bmp\0" \
-			L"\0";
-		break;
-	case FFSAVE_WAV:
+L"\0";
+break;
+case FFSAVE_TEXT:
+if (filename.empty())
+{
+wcsncpy( mFilesW,L"untitled.txt", FILENAME_BUFFER_SIZE); /*Flawfinder: ignore*/
+}
+mOFN.lpstrDefExt = L"txt";
+mOFN.lpstrFilter =
+L"Text files (*.txt)\0*.txt\0"
+L"RTF Files (*.rtf)\0*.rtf\0"
+L"LSL Files (*.lsl)\0*.lsl\0"
+L"\0";
+break;
+case FFSAVE_WAV:
 		if (filename.empty())
 		{
 			wcsncpy( mFilesW,L"untitled.wav", FILENAME_BUFFER_SIZE);	/*Flawfinder: ignore*/
