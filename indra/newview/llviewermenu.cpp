@@ -815,6 +815,11 @@ void init_menus()
 	menu->append(new LLMenuItemCallGL(	"VFS Explorer",
 												&handle_vfs_explorer, NULL));	
 	menu->appendSeparator();
+	menu->append(new LLMenuItemCheckGL("Mega Zoom On/Off", 
+									   &menu_toggle_control,
+									   NULL, 
+									   &menu_check_control,
+									   (void*)"DisableCameraConstraints"));
 	menu->append(new LLMenuItemCheckGL("Hacked Godmode",
 										   &handle_toggle_hacked_godmode,
 										   NULL,
@@ -1125,12 +1130,6 @@ void init_client_menu(LLMenuGL* menu)
 									   NULL, 
 									   &menu_check_control,
 									   (void*)"LimitSelectDistance"));
-
-	menu->append(new LLMenuItemCheckGL("Disable Camera Constraints", 
-									   &menu_toggle_control,
-									   NULL, 
-									   &menu_check_control,
-									   (void*)"DisableCameraConstraints"));
 
 	menu->append(new LLMenuItemCheckGL("Mouse Smoothing",
 										&menu_toggle_control,

@@ -198,6 +198,10 @@ const F32 OBJECT_MIN_ZOOM = 0.02f;
 const F32 APPEARANCE_MIN_ZOOM = 0.39f;
 const F32 APPEARANCE_MAX_ZOOM = 8.f;
 
+// simms max out zoom
+const F32 DIST_FUDGE = 16.f; // meters
+const F32 MAX_CAMERA_DIST_NO_CONSTRANT = 65535.f*4.f;
+
 // fidget constants
 const F32 MIN_FIDGET_TIME = 8.f; // seconds
 const F32 MAX_FIDGET_TIME = 20.f; // seconds
@@ -1743,10 +1747,18 @@ F32 LLAgent::getCameraZoomFraction()
 	else
 	{
 		F32 min_zoom;
-		const F32 DIST_FUDGE = 16.f; // meters
-		F32 max_zoom = llmin(mDrawDistance - DIST_FUDGE, 
-								LLWorld::getInstance()->getRegionWidthInMeters() - DIST_FUDGE,
+		//simms max out zoom
+		F32 max_zoom;
+		if (gSavedSettings.getBOOL("DisableCameraConstraints"))
+		{
+			max_zoom = MAX_CAMERA_DIST_NO_CONSTRANT;
+		}
+		else
+		{
+		max_zoom = llmin(mDrawDistance - DIST_FUDGE, 						
+		LLWorld::getInstance()->getRegionWidthInMeters() - DIST_FUDGE,
 								MAX_CAMERA_DISTANCE_FROM_AGENT);
+		}
 
 		F32 distance = (F32)mCameraFocusOffsetTarget.magVec();
 		if (mFocusObject.notNull())
@@ -1792,10 +1804,18 @@ void LLAgent::setCameraZoomFraction(F32 fraction)
 	else
 	{
 		F32 min_zoom = LAND_MIN_ZOOM;
-		const F32 DIST_FUDGE = 16.f; // meters
-		F32 max_zoom = llmin(mDrawDistance - DIST_FUDGE, 
+		//simms max out zoom
+		F32 max_zoom;
+		if (gSavedSettings.getBOOL("DisableCameraConstraints"))
+		{
+			max_zoom = MAX_CAMERA_DIST_NO_CONSTRANT;
+		}
+		else
+		{
+			max_zoom = llmin(mDrawDistance - DIST_FUDGE,
 								LLWorld::getInstance()->getRegionWidthInMeters() - DIST_FUDGE,
 								MAX_CAMERA_DISTANCE_FROM_AGENT);
+		}
 
 		if (mFocusObject.notNull())
 		{
@@ -1878,69 +1898,70 @@ void LLAgent::cameraOrbitOver(const F32 angle)
 //-----------------------------------------------------------------------------
 void LLAgent::cameraZoomIn(const F32 fraction)
 {
-	if (gDisconnected)
-	{
-		return;
-	}
+if (gDisconnected)
+{
+return;
+}
 
-	LLObjectSelectionHandle selection = LLSelectMgr::getInstance()->getSelection();
-	if (selection->getObjectCount() && selection->getSelectType() == SELECT_TYPE_HUD)
-	{
-		// just update hud zoom level
-		mHUDTargetZoom /= fraction;
-		return;
-	}
+LLObjectSelectionHandle selection = LLSelectMgr::getInstance()->getSelection();
+if (selection->getObjectCount() && selection->getSelectType() == SELECT_TYPE_HUD)
+{
+// just update hud zoom level
+mHUDTargetZoom /= fraction;
+return;
+}
 
 
-	LLVector3d	camera_offset(mCameraFocusOffsetTarget);
-	LLVector3d	camera_offset_unit(mCameraFocusOffsetTarget);
-	F32 min_zoom = LAND_MIN_ZOOM;
-	F32 current_distance = (F32)camera_offset_unit.normalize();
-	F32 new_distance = current_distance * fraction;
+LLVector3d camera_offset(mCameraFocusOffsetTarget);
+LLVector3d camera_offset_unit(mCameraFocusOffsetTarget);
+F32 min_zoom = LAND_MIN_ZOOM;
+F32 current_distance = (F32)camera_offset_unit.normalize();
+F32 new_distance = current_distance * fraction;
 
-	// Don't move through focus point
-	if (mFocusObject)
-	{
-		LLVector3 camera_offset_dir((F32)camera_offset_unit.mdV[VX], (F32)camera_offset_unit.mdV[VY], (F32)camera_offset_unit.mdV[VZ]);
+// Don't move through focus point
+if (mFocusObject)
+{
+LLVector3 camera_offset_dir((F32)camera_offset_unit.mdV[VX], (F32)camera_offset_unit.mdV[VY], (F32)camera_offset_unit.mdV[VZ]);
 
-		if (mFocusObject->isAvatar())
-		{
-			calcCameraMinDistance(min_zoom);
-		}
-		else
-		{
-			min_zoom = OBJECT_MIN_ZOOM;
-		}
-	}
+if (mFocusObject->isAvatar())
+{
+calcCameraMinDistance(min_zoom);
+}
+else
+{
+min_zoom = OBJECT_MIN_ZOOM;
+}
+}
 
-	new_distance = llmax(new_distance, min_zoom); 
+// Don't zoom too far back
+// Actually, let's when disable camera constraints is active -- McCabe
+if (!gSavedSettings.getBOOL("DisableCameraConstraints"))
+{
+new_distance = llmax(new_distance, min_zoom);
 
-	// Don't zoom too far back
-	const F32 DIST_FUDGE = 16.f; // meters
-	F32 max_distance = llmin(mDrawDistance - DIST_FUDGE, 
-							 LLWorld::getInstance()->getRegionWidthInMeters() - DIST_FUDGE );
+F32 max_distance = llmin(mDrawDistance - DIST_FUDGE,
+LLWorld::getInstance()->getRegionWidthInMeters() - DIST_FUDGE );
 
-	if (new_distance > max_distance)
-	{
-		// <edit> screw cam constraints
-		//new_distance = max_distance;
-		// </edit>
+if (new_distance > max_distance)
+{
+new_distance = max_distance;
 
-		/*
-		// Unless camera is unlocked
-		if (!LLViewerCamera::sDisableCameraConstraints)
-		{
-			return;
-		}
-		*/
-	}
+/*
+// Unless camera is unlocked
+if (!LLViewerCamera::sDisableCameraConstraints)
+{
+return;
+}
+*/
+}
 
-	if( cameraCustomizeAvatar() )
-	{
-		new_distance = llclamp( new_distance, APPEARANCE_MIN_ZOOM, APPEARANCE_MAX_ZOOM );
-	}
+if( cameraCustomizeAvatar() )
+{
+new_distance = llclamp( new_distance, APPEARANCE_MIN_ZOOM, APPEARANCE_MAX_ZOOM );
+}
+}
 
-	mCameraFocusOffsetTarget = new_distance * camera_offset_unit;
+mCameraFocusOffsetTarget = new_distance * camera_offset_unit;
 }
 
 //-----------------------------------------------------------------------------
@@ -1948,66 +1969,67 @@ void LLAgent::cameraZoomIn(const F32 fraction)
 //-----------------------------------------------------------------------------
 void LLAgent::cameraOrbitIn(const F32 meters)
 {
-	if (mFocusOnAvatar && mCameraMode == CAMERA_MODE_THIRD_PERSON)
-	{
-		F32 camera_offset_dist = llmax(0.001f, mCameraOffsetDefault.magVec() * gSavedSettings.getF32("CameraOffsetScale"));
-		
-		mCameraZoomFraction = (mTargetCameraDistance - meters) / camera_offset_dist;
+if (mFocusOnAvatar && mCameraMode == CAMERA_MODE_THIRD_PERSON)
+{
+F32 camera_offset_dist = llmax(0.001f, mCameraOffsetDefault.magVec());
 
-		if (!gSavedSettings.getBOOL("FreezeTime") && mCameraZoomFraction < MIN_ZOOM_FRACTION && meters > 0.f)
-		{
-			// No need to animate, camera is already there.
-			changeCameraToMouselook(FALSE);
-		}
+mCameraZoomFraction = (mTargetCameraDistance - meters) / camera_offset_dist;
 
-		mCameraZoomFraction = llclamp(mCameraZoomFraction, MIN_ZOOM_FRACTION, MAX_ZOOM_FRACTION);
-	}
-	else
-	{
-		LLVector3d	camera_offset(mCameraFocusOffsetTarget);
-		LLVector3d	camera_offset_unit(mCameraFocusOffsetTarget);
-		F32 current_distance = (F32)camera_offset_unit.normalize();
-		F32 new_distance = current_distance - meters;
-		F32 min_zoom = LAND_MIN_ZOOM;
-		
-		// Don't move through focus point
-		if (mFocusObject.notNull())
-		{
-			if (mFocusObject->isAvatar())
-			{
-				min_zoom = AVATAR_MIN_ZOOM;
-			}
-			else
-			{
-				min_zoom = OBJECT_MIN_ZOOM;
-			}
-		}
+if (!gSavedSettings.getBOOL("FreezeTime") && mCameraZoomFraction < MIN_ZOOM_FRACTION && meters > 0.f)
+{
+// No need to animate, camera is already there.
+changeCameraToMouselook(FALSE);
+}
 
-		new_distance = llmax(new_distance, min_zoom);
+mCameraZoomFraction = llclamp(mCameraZoomFraction, MIN_ZOOM_FRACTION, MAX_ZOOM_FRACTION);
+}
+else
+{
+LLVector3d camera_offset(mCameraFocusOffsetTarget);
+LLVector3d camera_offset_unit(mCameraFocusOffsetTarget);
+F32 current_distance = (F32)camera_offset_unit.normalize();
+F32 new_distance = current_distance - meters;
 
-		// Don't zoom too far back
-		const F32 DIST_FUDGE = 16.f; // meters
-		F32 max_distance = llmin(mDrawDistance - DIST_FUDGE, 
-								 LLWorld::getInstance()->getRegionWidthInMeters() - DIST_FUDGE );
+// Don't zoom too far back
+// Actually, let's when disable camera constraints is active -- McCabe
+if (!gSavedSettings.getBOOL("DisableCameraConstraints"))
+{
+F32 min_zoom = LAND_MIN_ZOOM;
+F32 max_distance;
 
-		if (new_distance > max_distance)
-		{
-			// Unless camera is unlocked
-			if (!gSavedSettings.getBOOL("DisableCameraConstraints"))
-			{
-				return;
-			}
-		}
+// Don't move through focus point
+if (mFocusObject.notNull())
+{
+if (mFocusObject->isAvatar())
+{
+min_zoom = AVATAR_MIN_ZOOM;
+}
+else
+{
+min_zoom = OBJECT_MIN_ZOOM;
+}
+}
 
-		if( CAMERA_MODE_CUSTOMIZE_AVATAR == getCameraMode() )
-		{
-			new_distance = llclamp( new_distance, APPEARANCE_MIN_ZOOM, APPEARANCE_MAX_ZOOM );
-		}
+new_distance = llmax(new_distance, min_zoom);
 
-		// Compute new camera offset
-		mCameraFocusOffsetTarget = new_distance * camera_offset_unit;
-		cameraZoomIn(1.f);
-	}
+max_distance = llmin(mDrawDistance - DIST_FUDGE,
+LLWorld::getInstance()->getRegionWidthInMeters() - DIST_FUDGE );
+
+if (new_distance > max_distance)
+{
+return;
+}
+
+if( CAMERA_MODE_CUSTOMIZE_AVATAR == getCameraMode() )
+{
+new_distance = llclamp( new_distance, APPEARANCE_MIN_ZOOM, APPEARANCE_MAX_ZOOM );
+}
+}
+
+// Compute new camera offset
+mCameraFocusOffsetTarget = new_distance * camera_offset_unit;
+cameraZoomIn(1.f);
+}
 }
 
 
