@@ -1,28 +1,16 @@
-SAUSAGES IS AN EXCELLENT CLIENT
-===============================
+Inertia Pro 
+============
+A fork of Sausages Aimed
 
-IT IS FOR GOOD PEOPLE, IT IS BASED ON INERTIA.
+At A rebirth of Inertia
+
+Thanks Dayoh, Hazim, Apelsin, Phr0z3nt04st, SimmanFederal
+
+For The Great  source base and continued Support
+
+And Thanks Keimo, FC team, And Hazim again for leaking the onyx source
+
+Simms......
 
 
-FAQ
-===
 
-Why such a dumb name?
----------------------
-
-'cause.
-
-Is there a private version with more features I can purchase?
--------------------------------------------------------------
-
-Nope.
-
-You're a bad person
--------------------
-
-Not a question, also, I'm a good person.
-
-How can I be sure that this viewer won't steal my password?
------------------------------------------------------------
-
-You can't.
